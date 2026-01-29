@@ -4,63 +4,69 @@ import { useDb } from './DbContext';
 
 
 function Cart() {
-
-    const [cart_data, isCart] = useState([]);
+    const [mode, setMode] = useState(true);
+    const [cart_data, setCart] = useState([]);
+    const [total_sum, setTotal] = useState("");
+    const navigate = useLocation();
     const db = useDb();
-    const {state} = useLocation();
 
-function add_one(name, quantity) {
-    quantity = quantity + 1;
-    if (check_quantity(name, quantity, "add")) {
-        db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
-    } else {
-        return;
-    }
-}
-
-function minus_one(name, quantity) {
-    quantity = quantity - 1;
-    if (quantity <= 0) {
-        return;
-    } else {
-        db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name])
-    }
-}
-
-function check_quantity(name, quantity, query) {
-    let current_quantity = db.exec("SELECT quantity FROM cart WHERE name = ?", [name])[0].values[0][0];
-    let product_quantity;
-    if (query == "add") {
+    function check_quantity(name, quantity, query) {
+      let current_quantity = db.exec("SELECT quantity FROM cart WHERE name = ?", [name])[0].values[0][0];
+      let product_quantity;
+      if (query == "add") {
         product_quantity = db.exec("SELECT quantity FROM products WHERE name = ?", [name])[0].values[0][0];
         return current_quantity > quantity || product_quantity >= quantity
-    } else if (query == "substract") {
-        quantity = quantity - 1;
-        if (current_quantity != 0 || quantity > 0) {
-            return true
-        } else {
+      } else if (query == "substract") {
+         quantity = quantity - 1;
+         if (current_quantity != 0 || quantity > 0) {
+             return true
+         } else {
             return false
-        }
+         }
+      }
     }
-}
+    
+     {/*Guest mode*/}
+     function add_one(name, quantity) {
+        quantity = quantity + 1;
+        if (check_quantity(name, quantity, "add")) {
+           db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
+           select_cart();
+        } else {
+          return;
+        }
+     }
 
-function delete_cart(name) {
-    db.run("DELETE FROM cart WHERE name = ?", [name])
-}
+      function minus_one(name, quantity) {
+         quantity = quantity - 1;
+         if (quantity <= 0) {
+            return;
+         } else {
+            db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
+            select_cart();
+         }
+       }
 
-function fetch_client_cart(name, quantity, query_command) {
-    fetch("", {
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-           "product_name": name,
-           "quantity": quantity,
-           "query": query_command
-        }),
-        method: "POST",
-        credentials: "include"
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data["message"] == "Success") {
+      function delete_cart(name) {
+        db.run("DELETE FROM cart WHERE name = ?", [name]);
+        select_cart();
+      }
+
+       {/*Logged in mode*/}
+      function fetch_client_cart(name, quantity, query_command) {
+        fetch("", {
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+             "product_name": name,
+             "quantity": quantity,
+             "query": query_command
+          }),
+          method: "POST",
+         credentials: "include"
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data["message"] == "Success") {
             if (query_command == "insert") {
                 db.run("INSERT INTO cart VALUES (?,?)", []);
             } else if (query_command == "update") {
@@ -69,54 +75,73 @@ function fetch_client_cart(name, quantity, query_command) {
                 db.run("DELETE FROM cart WHERE name = ?", [name]);
             }
             const result = db.exec("SELECT * FROM cart");
-            isCart(result[0].values);
+            setCart(result[0].values);
+          }
+        })
+      }
+
+     function total() {
+       let sum = 0;
+       let result = db.exec("SELECT * FROM cart")[0].values;
+       result.forEach(element => {
+          let product_price = db.exec("SELECT price FROM products WHERE name = ?", [element[0]])[0].values[0][0];
+          sum += element[1] * product_price;
+       });
+       setTotal(String(sum));
+       return;
+      }
+
+      function subtotal(name, quantity) {
+        let sum = 0;
+        let product_price = db.exec("SELECT price FROM products WHERE name = ?", [name])[0].values[0][0];
+        return sum += quantity * product_price 
+      }
+
+       function add_substarct(product_name, product_quantity, bs) {
+         let newQuantity = 0;
+         if (check_quantity(product_name, product_quantity, bs) == true) {
+           if (bs == "add") {
+              newQuantity = quantity + 1;
+              fetch_client_cart(product_name, product_quantity, "update")
+           } else if (bs == "substract") {
+              newQuantity = quantity - 1;
+              fetch_client_cart(product_name, product_quantity, "update")
+           }
+         }
         }
-    })
-}
 
-function total() {
-    let sum = 0;
-    let result = db.exec("SELECT * FROM cart")[0].values;
-    result.forEach(element => {
-        let product_price = db.exec("SELECT price FROM products WHERE name = ?", [element[0]])[0].values[0][0];
-        sum += element[1] * product_price;
-    });
-    return sum;
-}
+      function select_cart() {
+        let cart_data;
+        cart_data = db.exec("SELECT * FROM cart")[0].values;
+        setCart(cart_data);
+      }
 
-function subtotal(name, quantity) {
-    let sum = 0;
-    let product_price = db.exec("SELECT price FROM products WHERE name = ?", [name])[0].values[0][0];
-    return sum += quantity * product_price 
-}
+      function order() {
+        let cart_data;
+        cart_data = db.exec("SELECT name, quantity FROM cart")[0].values;
+        fetch("", {
+          headers: {"Content-Type":"application/json"},
+          method: "POST",
+          body: JSON.stringify({"order_items": cart_data})
+        })
+        .then(response => response.json())
+        .then(data => {
+          window.location.href = `/token=${data.token}`;
+        })
+      }
 
-function add_substarct(product_name, product_quantity, bs) {
-    let newQuantity = 0;
-    if (check_quantity(product_name, product_quantity, bs) == true) {
-        if (bs == "add") {
-            newQuantity = quantity + 1;
-            fetch_client_cart(product_name, product_quantity, "update")
-        } else if (bs == "substract") {
-            newQuantity = quantity - 1;
-            fetch_client_cart(product_name, product_quantity, "update")
-        }
-    }
-}
-
-    useEffect(() => {
-  const mode = localStorage.getItem("mode") === "true";
-  if (!mode) {
-    const result = db.exec("SELECT * FROM cart");
-    setCart(result[0]?.values || []);
-  } else {
-    setCart(state?.cart_data || []);
+useEffect(() => {
+  const mode = localStorage.getItem("mode");
+  if (mode == null) {
+    setMode(true);
   }
+  select_cart();
 }, []);
     
     return(
         <div id="cart_screen">
           <div id="cart_header">
-             <p><i className="fa fa-arrow-left"></i></p>
+             <p onClick={() => navigate("/home")}><i className="fa fa-arrow-left"></i></p>
           </div>
               <p id="your_cart_subtitle">Your cart</p>
 <table>
@@ -147,8 +172,8 @@ function add_substarct(product_name, product_quantity, bs) {
 </table>
 <div id="total_price">
     <div>
-        <p>Total: RM{total()}</p>
-        <button>Place order</button>
+        <p>Total: RM{total_sum}</p>
+        <button onClick={() => order()}>Place order</button>
     </div>
 </div>
 </div>
