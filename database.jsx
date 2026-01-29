@@ -24,10 +24,20 @@ export function DbProvider({ children }) {
       `);
 
       database.run(`
+        CREATE TABLE IF NOT EXISTS account (
+          email TEXT NOT NULL,
+          phone_number TEXT NOT NULL,
+          date TEXT NOT NULL
+        );
+      `);
+
+      database.run(`
         CREATE TABLE IF NOT EXISTS products (
           name TEXT NOT NULL,
           quantity INTEGER NOT NULL,
-          price NOT NULL
+          price NOT NULL,
+          img_link TEXT NOT NULL,
+          description TEXT NOT NULL
         );
       `); 
 
