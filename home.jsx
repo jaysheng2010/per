@@ -78,7 +78,7 @@ function Home() {
                 <h2 className="homepage_words">Rewrite Your Aura</h2>
                 <br/>
                 <br/>
-                <p className="homepage_words">Lorem Ipsum is simply dummy text of the printing and typesetting industry.  </p>
+                <p className="homepage_words">ReDNA is a fragrance brand built on rewriting identity, celebrating self-expression, individuality, and confidence through scent.</p>
                 <br/>
                 <p className="homepage_words">We only support Malaysia's orders.</p>
                 <br/>
