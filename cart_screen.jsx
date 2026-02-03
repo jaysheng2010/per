@@ -6,7 +6,7 @@ function CartScreen() {
         if (sessionStorage.getItem("mode") === "registered") {
             setLogin(true);
         }
-    })
+    }, [])
     return login ? <Cart /> : <CartWithout />;
 }
 
