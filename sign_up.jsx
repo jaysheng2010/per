@@ -1,7 +1,10 @@
-import LoginScreen from './login_form.jsx';
 import { useDb } from './DbContext';
 import "./signup.css";
 import {useState, useEffect} from "react";
+import Success from "./success.jsx";
+import Error from "./error.jsx";
+import Loading from "./loading.jsx";
+import LoginScreen from './login_form.jsx';
 
 function SignUp({ onClose, onSuccess }) {
     const [sign_up, setSignUp] = useState("sign-up");
