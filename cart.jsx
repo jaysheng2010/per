@@ -21,7 +21,7 @@ function Cart() {
       cart_data.forEach(item => {
         sum += subtotal(item[0], item[1]);
       });
-      setTotal(sum);
+      setTotal(String(sum));
     }, [cart_data]);
 
        {/*Logged in mode*/}
@@ -63,6 +63,14 @@ function Cart() {
         if (!result[0]?.values[0]?.[0]) return 0; // fallback
         const product_price = result[0].values[0][0];
         return quantity * product_price; 
+      }
+
+     function subtotal_render(name, quantity) {
+        const result = db.exec("SELECT price FROM products WHERE name = ?", [name]);
+        if (!result[0]?.values[0]?.[0]) return "Not available"; // fallback
+        const product_price = result[0].values[0][0];
+        let total_sub = quantity * product_price;
+        return "RM" + String(total_sub)
       }
 
       function order() {
@@ -107,7 +115,7 @@ function Cart() {
                     <div className="amount">{item[1]}</div>
                     <div className="add_minus_btn" onClick={() => fetch_client_cart(item[0], item[1] + 1, "update")}>+</div>
                 </div>
-                <div className="subtotal">{subtotal(item[0], item[1])}</div>
+                <div className="subtotal">{subtotal_render(item[0], item[1])}</div>
               </div>
             </div>
         </td>
