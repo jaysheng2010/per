@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDb } from "./DbContext";
-import "./item_detail.css";
+import "./all_products.css";
+import CartScreen from "cart_screen.jsx";
 
 function Product_all() {
   const db = useDb();
   const navigate = useNavigate();
   const [result, setResult] = useState([]);
-
+  const [screen, setScreen] = useState(null);
+  
   useEffect(() => {
     const res = db.exec("SELECT * FROM products");
     if (res.length > 0) {
@@ -17,6 +19,7 @@ function Product_all() {
 
   return (
     <>
+      {screen === null && (
       <div id="search_header">
         <button id="back_button">
           <i className="fa fa-arrow-left"></i>
@@ -31,7 +34,7 @@ function Product_all() {
           </button>
         </form>
 
-        <p id="cart">
+        <p id="cart" onClick={() => setScreen("cart")}>
           <i className="fa fa-shopping-cart"></i>
         </p>
       </div>
@@ -68,6 +71,9 @@ function Product_all() {
           </div>
         ))}
       </div>
+    )}
+
+      {screen === "cart" && <CartScreen />}
     </>
   );
 }
