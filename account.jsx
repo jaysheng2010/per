@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDb } from "./DbContext";
 import "./account.css";
+import OrderTracking from "./order_tracking.jsx";
+import Contact from "./contact.jsx";
 function Account() {
     const [show_screen, setScreen] = useState(null);
     const [show_order, setOrderTracking] = useState(false);
