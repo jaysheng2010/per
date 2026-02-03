@@ -1,5 +1,7 @@
 import { useState } from "react";
 import "./reset_password.css";
+import Success from "./success.jsx";
+import Error from "./error.jsx";
 
 function Reset({ onClose }) {
     const [email, setEmail] = useState("");
