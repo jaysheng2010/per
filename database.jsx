@@ -32,6 +32,14 @@ export function DbProvider({ children }) {
       `);
 
       database.run(`
+        CREATE TABLE IF NOT EXISTS account (
+          order_id TEXT NOT NULL,
+          order_items TEXT NOT NULL,
+          date TEXT NOT NULL
+        );
+      `);
+
+      database.run(`
         CREATE TABLE IF NOT EXISTS products (
           name TEXT NOT NULL,
           quantity INTEGER NOT NULL,

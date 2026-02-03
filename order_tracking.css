@@ -1,0 +1,60 @@
+ #order-tracking_page {
+        width: 100%;
+        max-width: 800px;
+        margin: auto;
+    }
+
+    .each_order {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 40px;
+    }
+
+    .date_order {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .date_order p {
+        margin-left: auto;
+        color: red;
+        cursor: pointer;
+    }
+
+    .each_ordered_item {
+        display: flex;
+        align-items: center;
+        border: 1px solid black;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+    }
+
+    .item_info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .item_info img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    .item_info div {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    #order_tracking_back {
+        display: flex;
+        width: 100%;
+    }
+
+    #order_tracking_back > p {
+        font-size: 30px;
+        margin: 10px 0;
+    }

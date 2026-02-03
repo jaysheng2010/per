@@ -1,0 +1,36 @@
+#contact_page {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     border: 1px solid black;
+     border-radius: 7px;
+     padding: 20px;
+   }
+
+   .icon_contact {
+     font-size: 30px;
+     color: black;
+     margin: 0;
+     margin-top: 20px;
+   }
+
+   #contact_page_container {
+     width: 100%;
+     background-color: transparent;
+     display: flex;
+     justify-content: center;
+     position: absolute;
+     top: 0;
+     left: 0;
+   }
+
+   #contact_page > button {
+     background-color: purple;
+     color: white;
+     padding: 2px 10px;
+     font-size: 17px;
+   }
+   
+   #feel_free {
+     font-size: 18px;
+   }

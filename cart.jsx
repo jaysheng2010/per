@@ -1,59 +1,34 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDb } from './DbContext';
 
 
 function Cart() {
-    const [mode, setMode] = useState(true);
     const [cart_data, setCart] = useState([]);
     const [total_sum, setTotal] = useState("");
-    const navigate = useLocation();
+    const navigate = useNavigate();
     const db = useDb();
 
-    function check_quantity(name, quantity, query) {
-      let current_quantity = db.exec("SELECT quantity FROM cart WHERE name = ?", [name])[0].values[0][0];
-      let product_quantity;
-      if (query == "add") {
-        product_quantity = db.exec("SELECT quantity FROM products WHERE name = ?", [name])[0].values[0][0];
-        return current_quantity > quantity || product_quantity >= quantity
-      } else if (query == "substract") {
-         quantity = quantity - 1;
-         if (current_quantity != 0 || quantity > 0) {
-             return true
-         } else {
-            return false
-         }
-      }
-    }
-    
-     {/*Guest mode*/}
-     function add_one(name, quantity) {
-        quantity = quantity + 1;
-        if (check_quantity(name, quantity, "add")) {
-           db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
-           select_cart();
-        } else {
-          return;
-        }
+    useEffect(() => {
+     const result = db.exec("SELECT * FROM cart");
+     if (result[0]?.values?.length) {
+       setCart(result[0].values);
      }
+    }, []);
 
-      function minus_one(name, quantity) {
-         quantity = quantity - 1;
-         if (quantity <= 0) {
-            return;
-         } else {
-            db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
-            select_cart();
-         }
-       }
-
-      function delete_cart(name) {
-        db.run("DELETE FROM cart WHERE name = ?", [name]);
-        select_cart();
-      }
+    useEffect(() => {
+      let sum = 0;
+      cart_data.forEach(item => {
+        sum += subtotal(item[0], item[1]);
+      });
+      setTotal(sum);
+    }, [cart_data]);
 
        {/*Logged in mode*/}
       function fetch_client_cart(name, quantity, query_command) {
+        if (quantity < 0) {
+          return;
+        }
         fetch("", {
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({
@@ -78,42 +53,16 @@ function Cart() {
             setCart(result[0].values);
           }
         })
-      }
-
-     function total() {
-       let sum = 0;
-       let result = db.exec("SELECT * FROM cart")[0].values;
-       result.forEach(element => {
-          let product_price = db.exec("SELECT price FROM products WHERE name = ?", [element[0]])[0].values[0][0];
-          sum += element[1] * product_price;
-       });
-       setTotal(String(sum));
-       return;
+        .catch(error => {
+          alert(`Error on ${query_command} cart.`);
+        })
       }
 
       function subtotal(name, quantity) {
-        let sum = 0;
-        let product_price = db.exec("SELECT price FROM products WHERE name = ?", [name])[0].values[0][0];
-        return sum += quantity * product_price 
-      }
-
-       function add_substarct(product_name, product_quantity, bs) {
-         let newQuantity = 0;
-         if (check_quantity(product_name, product_quantity, bs) == true) {
-           if (bs == "add") {
-              newQuantity = quantity + 1;
-              fetch_client_cart(product_name, product_quantity, "update")
-           } else if (bs == "substract") {
-              newQuantity = quantity - 1;
-              fetch_client_cart(product_name, product_quantity, "update")
-           }
-         }
-        }
-
-      function select_cart() {
-        let cart_data;
-        cart_data = db.exec("SELECT * FROM cart")[0].values;
-        setCart(cart_data);
+        const result = db.exec("SELECT price FROM products WHERE name = ?", [name]);
+        if (!result[0]?.values[0]?.[0]) return 0; // fallback
+        const product_price = result[0].values[0][0];
+        return quantity * product_price; 
       }
 
       function order() {
@@ -129,14 +78,6 @@ function Cart() {
           window.location.href = `/token=${data.token}`;
         })
       }
-
-useEffect(() => {
-  const mode = localStorage.getItem("mode");
-  if (mode == null) {
-    setMode(true);
-  }
-  select_cart();
-}, []);
     
     return(
         <div id="cart_screen">
@@ -144,6 +85,9 @@ useEffect(() => {
              <p onClick={() => navigate("/home")}><i className="fa fa-arrow-left"></i></p>
           </div>
               <p id="your_cart_subtitle">Your cart</p>
+      {cart_data.length === 0 ? (
+      <p>Your cart is empty 😢</p>
+    ) : (
 <table>
     {cart_data.map( (item) =>  
       <tr className="_items" key={item[0]}>
@@ -154,26 +98,27 @@ useEffect(() => {
                     <div>
                         <p>{item[0]}</p>
                         <br />
-                        <p className="remove_btn" onClick={() => mode ?  delete_cart(item[0]) : fetch_client_cart(item[0], item[1], "delete")}>Remove</p>
+                        <p className="remove_btn" onClick={() => fetch_client_cart(item[0], item[1], "delete")}>Remove</p>
                     </div>
                 </div>
               <div className="all_amount_container"> 
                 <div className="amount_container">
-                    <div className="add_minus_btn" onClick={() => mode ? add_one(item[0], item[1]) : add_substarct(item[0], item[1], "substract")}>−</div>
+                    <div className="add_minus_btn" onClick={() => fetch_client_cart(item[0], item[1] - 1, "update")}>−</div>
                     <div className="amount">{item[1]}</div>
-                    <div className="add_minus_btn" onClick={() => mode ? minus_one(item[0], item[1]) : add_substarct(item[0], item[1], "add")}>+</div>
+                    <div className="add_minus_btn" onClick={() => fetch_client_cart(item[0], item[1] + 1, "update")}>+</div>
                 </div>
                 <div className="subtotal">{subtotal(item[0], item[1])}</div>
               </div>
             </div>
         </td>
     </tr>  
-    )};
+    )}
 </table>
+)}
 <div id="total_price">
     <div>
         <p>Total: RM{total_sum}</p>
-        <button onClick={() => order()}>Place order</button>
+        <button onClick={() => order()} disabled={cart_data.length === 0}>Place order</button>
     </div>
 </div>
 </div>

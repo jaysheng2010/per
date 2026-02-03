@@ -4,28 +4,48 @@ import { useDb } from './DbContext';
 import "./item_detail.css";
 
 function Details() {
-    const state = useLocation();
+    const {state} = useLocation();
     const navigate = useNavigate();
     const [add_num, Add] = useState(1);
     const db = useDb();
 
     function insert_cart(name, quantity) {
-      let check = db.exec("SELECT name FROM cart");
-      for (x of check) {
-        if (name == x) {
-            alert("Item has already been inserted to cart. ")
-        } else {
-             db.run("INSERT INTO cart VALUES (?,?)", [name, quantity]);
+      const result = db.exec("SELECT name FROM cart");
+
+      if (result.length > 0) {
+        const names = result[0].values.map(row => row[0]);
+        if (names.includes(name)) {
+           alert("Item already in cart.");
+          return; 
         }
-       }
+      }
+
+       fetch("", {
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+             "product_name": name,
+             "quantity": quantity,
+             "query": "insert"
+          }),
+          method: "POST",
+          credentials: "include"
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data["message"] == "Success") {
+            db.run("INSERT INTO cart VALUES (?,?)", [name, quantity]);
+          } else {
+            alert("Error on adding items.");
+          }
+        })
      }
 
     function add_quantity() {
-        Add(Math.max(1, add_num - 1));
+        Add(Math.max(1, add_num + 1));
     }
 
     function minus_quantity() {
-        Add(Math.min(state?.quantity, add_num + 1));
+        Add(Math.min(state?.quantity, add_num - 1));
     }
 
     return (
@@ -44,7 +64,7 @@ function Details() {
                 <p>{add_num}</p>
                 <button onClick={() => add_quantity()}>+</button>
             </div>
-            <button onClick={() => insert_cart(state?.name, add_num)}>Add to cart</button>
+            <button onClick={() => insert_cart(state?.name, add_num)} disabled={!state}>Add to cart</button>
         </div>
     </div>
 </div>

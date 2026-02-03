@@ -19,7 +19,7 @@ function Product() {
 
         data.products.forEach(item => {
           db.run(
-            "INSERT OR IGNORE INTO products (name, quantity, price, image, description) VALUES (?,?,?,?,?)",
+            "INSERT OR IGNORE INTO products (name, quantity, price, img_link, description) VALUES (?,?,?,?,?)",
             [item[0], item[1], item[2], item[3],item[4]]
           );
         });
