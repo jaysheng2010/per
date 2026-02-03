@@ -42,15 +42,15 @@ function Cart() {
         .then(response => response.json())
         .then(data => {
           if (data["message"] == "Success") {
-            if (query_command == "insert") {
-                db.run("INSERT INTO cart VALUES (?,?)", []);
-            } else if (query_command == "update") {
+            if (query_command == "update") {
                 db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
             } else if (query_command == "delete") {
                 db.run("DELETE FROM cart WHERE name = ?", [name]);
             }
             const result = db.exec("SELECT * FROM cart");
             setCart(result[0].values);
+          } else {
+             alert(data.message); 
           }
         })
         .catch(error => {
