@@ -8,47 +8,29 @@ function LoginScreen({ onClose, onSuccess }) {
     const [password_login, setPassword_delete] = useState("");
     const db = useDb();
 
-    function login() {
-      let cart_data;
-      let image;
-      setLoginScreen("loading");
-      fetch("", {
-        headers: {"Content-Type":"application/json"},
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify({
-          "email": email_login,
-          "password": password_login
+    function delete() {
+        fetch("", {
+            "headers": {"Content-Type": "application/json"},
+            "body": JSON.stringify({}),
+            "method": "POST"
         })
-      })
-      .then(response => response.json())
-      .then(data => {
-         if (data.message == "success") {
-            const itemsArray = Object.entries(JSON.parse(data.cartdata));
-            itemsArray.forEach(([name, qty]) => {
-               image = db.exec("SELECT img_link FROM products WHERE name = ? ", [name]).values[0];
-               db.run("INSERT INTO cart VALUES (?,?,?)", [name, qty, image]);
-            });
-
-            const account_list = Object.entries(JSON.parse(data.account));
-            db.run("INSERT INTO account VALUES (?,?,?)", [account_list[0], account_list[1], account_list[2]]);
-
-            const order_list = Object.entries(JSON.parse(data.orderdata));
-            order_list.forEach((order_id, order_items) => {
-              db.run("INSERT INTO order VALUES (?,?)", [order_id, order_items]);
-            });
-            sessionStorage.setItem("mode", "registered");
-            setLoginScreen("success");
-         } else {
-           SetLoginScreen("error");
-         }
-      })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message == "success") {
+                db.run("DELETE FROM cart_tbl");
+                db.run("DELETE FROM account_tbl");
+                db.run("DELETE FROM order_tbl");
+                sessionStorage.setItem("mode", null);
+                setDeletedScreen("success");
+            } else {
+                setDeletedScreen("failed");
+            }
     }
 
     return (
       <>
       {login === "loading" && (<LoadingScreen />)}
-      {login === "failure" && (<Error onErrorClose={() => SetLoginScreen("form")}/>)}
+      {login === "failure" && (<Error onErrorClose={() => SetDeleteScreen("form")}/>)}
       {login === "success" && (<Success onSuccessClose={() => onSuccess}/>)}
       {login === "form" && (
         <div id="delete_form_container">
