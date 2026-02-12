@@ -1,25 +1,25 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./home.jsx"
-//import './App.css'
+import React from "react";
+import CartScreen from "./cart_screen.jsx";
+import Details from "./item_detail.jsx";
+import Home from "./home.jsx";
+import Product_all from "./all_products.jsx";
+import OrderSummary from "./order_summary.jsx";
+import Cart_sample from "./cart_sample.jsx";  
+import './App.css';
+
+import { Routes, Route } from "react-router-dom";
 
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/item" element={<Details />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/personal" element={<Account />} />
-        {/*
-        <Route path="/about" element={<About />} />
-        <Route path="/cart" element={<Cart />} />*/}
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/cart" element={<CartScreen />} />
+      <Route path="/item" element={<Details />} />
+      <Route path="/all" element={<Product_all />} />
+      <Route path="/summary" element={<Cart_sample />} />
+    </Routes>
   );
 }
 
-export default App
+export default App;

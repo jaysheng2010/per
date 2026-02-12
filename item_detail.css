@@ -23,6 +23,13 @@
     object-fit: cover;
 }
 
+#add_to_cart_container p {
+    font-size: 24px !important;
+}
+
+#add_cart_screen b {
+    font-size: 30px !important;
+}
 /* Right content column */
 #add_to_cart_container > div {
     display: flex;
@@ -53,18 +60,21 @@
 #add_to_cart_container button {
     background-color: rgb(207, 207, 207);
     color: black;
-    padding: 1vw 2vw;
-    font-size: 2vw;
+    padding: 10px 20px !important;
+    font-size: 20px !important;
     border: 1px solid black;
+    border-radius: 10px;
 }
 
 /* Add to cart button */
 #add_to_cart_container > div > div > button {
     background-color: blue;
     color: white;
-    padding: -1vw 1vw;
-    font-size: 2.5vw;
-    height: 100%;
+    padding: 5px !important;
+    font-size: 15px !important;
+    width: 100px !important; /* Adjust as needed */
+    height: 40px !important; /* Adjust as needed */
+    border: none;
 }
 
 #cancel_btn_add_container button {
@@ -73,6 +83,42 @@
    font-size: 4vw;
    border: none;
 }
+
+#web_header_item {
+        position: relative;
+        top: 0px;
+        left: 0px;
+        margin: 0;
+        background-color: #2F3A73;
+        width: 100%;
+        padding: 7px 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    #web_header_item > button {
+        color: white;
+        font-size: 22px;
+        border: none;
+        cursor: pointer;
+        background-color: transparent;
+    }
+    
+    #web_header_item > p {
+        color: white;
+        font-size: 22px;
+        background-color: transparent;
+        margin: 0;
+        margin-left: 5px;
+    }
+
+    #quantity_selector_add_cart {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2vw;
+    }
 
 @media (max-width: 520px) {
    #add_to_cart_container {

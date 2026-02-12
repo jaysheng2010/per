@@ -1,183 +1,216 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { useDb } from './DbContext';
-
+import { useNavigate } from "react-router-dom";
+import { useDb } from "./database.jsx";
 
 function Cart() {
-    const [mode, setMode] = useState(true);
-    const [cart_data, setCart] = useState([]);
-    const [total_sum, setTotal] = useState("");
-    const navigate = useLocation();
-    const db = useDb();
+  const [cart_data, setCart] = useState([]);
+  const [total_sum, setTotal] = useState("");
+  const [button_work, setButton_work] = useState(false);
+  const navigate = useNavigate();
+  const db = useDb();
 
-    function check_quantity(name, quantity, query) {
-      let current_quantity = db.exec("SELECT quantity FROM cart WHERE name = ?", [name])[0].values[0][0];
-      let product_quantity;
-      if (query == "add") {
-        product_quantity = db.exec("SELECT quantity FROM products WHERE name = ?", [name])[0].values[0][0];
-        return current_quantity > quantity || product_quantity >= quantity
-      } else if (query == "substract") {
-         quantity = quantity - 1;
-         if (current_quantity != 0 || quantity > 0) {
-             return true
-         } else {
-            return false
-         }
-      }
-    }
-    
-     {/*Guest mode*/}
-     function add_one(name, quantity) {
-        quantity = quantity + 1;
-        if (check_quantity(name, quantity, "add")) {
-           db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
-           select_cart();
-        } else {
-          return;
-        }
-     }
-
-      function minus_one(name, quantity) {
-         quantity = quantity - 1;
-         if (quantity <= 0) {
-            return;
-         } else {
-            db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
-            select_cart();
-         }
-       }
-
-      function delete_cart(name) {
-        db.run("DELETE FROM cart WHERE name = ?", [name]);
-        select_cart();
-      }
-
-       {/*Logged in mode*/}
-      function fetch_client_cart(name, quantity, query_command) {
-        fetch("", {
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-             "product_name": name,
-             "quantity": quantity,
-             "query": query_command
-          }),
-          method: "POST",
-         credentials: "include"
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data["message"] == "Success") {
-            if (query_command == "insert") {
-                db.run("INSERT INTO cart VALUES (?,?)", []);
-            } else if (query_command == "update") {
-                db.run("UPDATE cart SET quantity = ? WHERE name = ?", [quantity, name]);
-            } else if (query_command == "delete") {
-                db.run("DELETE FROM cart WHERE name = ?", [name]);
-            }
-            const result = db.exec("SELECT * FROM cart");
-            setCart(result[0].values);
-          }
-        })
-      }
-
-     function total() {
-       let sum = 0;
-       let result = db.exec("SELECT * FROM cart")[0].values;
-       result.forEach(element => {
-          let product_price = db.exec("SELECT price FROM products WHERE name = ?", [element[0]])[0].values[0][0];
-          sum += element[1] * product_price;
-       });
-       setTotal(String(sum));
-       return;
-      }
-
-      function subtotal(name, quantity) {
-        let sum = 0;
-        let product_price = db.exec("SELECT price FROM products WHERE name = ?", [name])[0].values[0][0];
-        return sum += quantity * product_price 
-      }
-
-       function add_substarct(product_name, product_quantity, bs) {
-         let newQuantity = 0;
-         if (check_quantity(product_name, product_quantity, bs) == true) {
-           if (bs == "add") {
-              newQuantity = quantity + 1;
-              fetch_client_cart(product_name, product_quantity, "update")
-           } else if (bs == "substract") {
-              newQuantity = quantity - 1;
-              fetch_client_cart(product_name, product_quantity, "update")
-           }
-         }
-        }
-
-      function select_cart() {
-        let cart_data;
-        cart_data = db.exec("SELECT * FROM cart")[0].values;
-        setCart(cart_data);
-      }
-
-      function order() {
-        let cart_data;
-        cart_data = db.exec("SELECT name, quantity FROM cart")[0].values;
-        fetch("", {
-          headers: {"Content-Type":"application/json"},
-          method: "POST",
-          body: JSON.stringify({"order_items": cart_data})
-        })
-        .then(response => response.json())
-        .then(data => {
-          window.location.href = `/token=${data.token}`;
-        })
-      }
-
-useEffect(() => {
-  const mode = localStorage.getItem("mode");
-  if (mode == null) {
-    setMode(true);
+  function subtotal(name, quantity) {
+    const result = db.exec(
+      "SELECT price FROM products WHERE name = ?",
+      [name]
+    );
+    if (!result[0]?.values[0]?.[0]) return 0;
+    const product_price = result[0].values[0][0];
+    return quantity * product_price;
   }
-  select_cart();
-}, []);
-    
-    return(
-        <div id="cart_screen">
-          <div id="cart_header">
-             <p onClick={() => navigate("/home")}><i className="fa fa-arrow-left"></i></p>
-          </div>
-              <p id="your_cart_subtitle">Your cart</p>
-<table>
-    {cart_data.map( (item) =>  
-      <tr className="_items" key={item[0]}>
-        <td colSpan="3">
-            <div className="cart_row">
-                <div className="cart_items">
-                    <img src={item[3]} />
-                    <div>
+
+  function subtotal_render(name, quantity) {
+    const result = db.exec(
+      "SELECT price FROM products WHERE name = ?",
+      [name]
+    );
+    if (!result[0]?.values[0]?.[0]) return "Not available";
+    const product_price = result[0].values[0][0];
+    let total_sub = quantity * product_price;
+    return "RM" + String(total_sub);
+  }
+
+  useEffect(() => {
+    const result = db.exec("SELECT * FROM cart");
+    if (result.length > 0) {
+      setCart(result[0].values);
+    } else {
+      setCart([]);
+    }
+  }, [db]);
+
+  useEffect(() => {
+    let sum = 0;
+    cart_data.forEach(item => {
+      sum += subtotal(item[0], item[1]);
+    });
+    setTotal(String(sum));
+  }, [cart_data, db]);
+
+  function fetch_client_cart(name, quantity, query_command) {
+    if (quantity < 1) return;
+
+    let token = db.exec("SELECT token FROM account")[0].values[0][0];
+    setButton_work(true);
+
+    fetch("http://192.168.0.224:5002/cart", {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        "product_name": name,
+        "quantity": quantity,
+        "query": query_command,
+        "token": token
+      }),
+      method: "POST"
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data["message"] === "success") {
+          if (query_command === "add" || query_command === "minus") {
+            db.run(
+              "UPDATE cart SET quantity = ? WHERE name = ?",
+              [quantity, name]
+            );
+          } else if (query_command === "delete") {
+            db.run(
+              "DELETE FROM cart WHERE name = ?",
+              [name]
+            );
+          }
+          const result = db.exec("SELECT * FROM cart");
+          if (result.length > 0) {
+            setCart(result[0].values);
+          } else {
+            setCart([]);
+          }
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(() => {
+        alert(`Error on ${query_command} cart.`);
+      });
+      setButton_work(false);
+  }
+
+  function order() {
+    const result = db.exec("SELECT name, quantity FROM cart");
+    if (result.length === 0) return;
+    const cart_data = result[0].values;
+    setButton_work(true);
+
+    fetch("http://192.168.0.224:5002/cart", {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify({ order_items: cart_data })
+    })
+      .then(response => response.json())
+      .then(data => {
+        window.location.href = `/token=${data.token}`;
+      });
+      setButton_work(false);
+  }
+
+  return (
+    <div id="cart_screen">
+      <div id="cart_header_item">
+        <button onClick={() => navigate("/")}>←</button>
+        <p>Back</p>
+      </div>
+
+
+      <p id="your_cart_subtitle">Your cart</p>
+
+      {cart_data.length === 0 ? (
+        <p>Your cart is empty 😢</p>
+      ) : (
+        <table>
+          <tbody>
+            {cart_data.map(item => (
+              <tr className="_items" key={item[0]}>
+                <td colSpan="3">
+                  <div className="cart_row">
+                    <div className="cart_items">
+                      <img src={item[2]} alt="" />
+                      <div>
                         <p>{item[0]}</p>
                         <br />
-                        <p className="remove_btn" onClick={() => mode ?  delete_cart(item[0]) : fetch_client_cart(item[0], item[1], "delete")}>Remove</p>
+                        <p
+                          className="remove_btn"
+                          onClick={() =>
+                            fetch_client_cart(
+                              item[0],
+                              item[1],
+                              "delete"
+                            )
+                          }
+                          disabled={button_work}
+                        >
+                          Remove
+                        </p>
+                      </div>
                     </div>
-                </div>
-              <div className="all_amount_container"> 
-                <div className="amount_container">
-                    <div className="add_minus_btn" onClick={() => mode ? add_one(item[0], item[1]) : add_substarct(item[0], item[1], "substract")}>−</div>
-                    <div className="amount">{item[1]}</div>
-                    <div className="add_minus_btn" onClick={() => mode ? minus_one(item[0], item[1]) : add_substarct(item[0], item[1], "add")}>+</div>
-                </div>
-                <div className="subtotal">{subtotal(item[0], item[1])}</div>
-              </div>
-            </div>
-        </td>
-    </tr>  
-    )};
-</table>
-<div id="total_price">
-    <div>
-        <p>Total: RM{total_sum}</p>
-        <button onClick={() => order()}>Place order</button>
+
+                    <div className="all_amount_container">
+                      <div className="amount_container">
+                        <div
+                          className="add_minus_btn"
+                          onClick={() =>
+                            fetch_client_cart(
+                              item[0],
+                              item[1] - 1,
+                              "minus"
+                            )
+                          }
+                          disabled={button_work}
+                        >
+                          −
+                        </div>
+
+                        <div className="amount">{item[1]}</div>
+
+                        <div
+                          className="add_minus_btn"
+                          onClick={() =>
+                            fetch_client_cart(
+                              item[0],
+                              item[1] + 1,
+                              "add"
+                            )
+                          }
+                          disabled={button_work}
+                        >
+                          +
+                        </div>
+                      </div>
+
+                      <div className="subtotal">
+                        {subtotal_render(item[0], item[1])}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div id="total_price">
+        <div>
+          <p>Total: RM{total_sum}</p>
+          <button
+            onClick={() => {
+              order();
+            }}
+            disabled={cart_data.length === 0 || button_work}
+          >
+            Place order
+          </button>
+        </div>
+      </div>
     </div>
-</div>
-</div>
-    );
+  );
 }
 
 export default Cart;
