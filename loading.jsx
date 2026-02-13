@@ -1,3 +1,4 @@
+import "./loading.css";
 function LoadingScreen() {
     return (
         <div id="login_signup_loading_container">
