@@ -1,0 +1,60 @@
+#delete_form_container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgb(231, 233, 235);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    #delete_form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        background-color: white;
+        box-shadow: 3px 3px 6px 1px grey;
+        width: 80%;
+        padding: 10px;
+        max-width: 500px;
+    }
+
+    #button_group_delete {
+        display: flex;
+        gap: 20px;
+    }
+
+    #cancel_delete_btn {
+        background-color: red;
+        color: white;
+        font-size: 16px;
+        padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+        flex: 1;
+    }
+
+    #submit_delete_btn {
+        background-color: #2F3A73;
+        color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 12px 20px;
+        flex: 1;
+    }
+    
+    #label_delete, #delete_input {
+      font-size: 17px;
+    }
+
+    #delete_input {border: 0.5px solid black; padding: 7px;}

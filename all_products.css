@@ -1,0 +1,115 @@
+#items_container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            width: 100%;
+            gap: 5vw;
+        }
+        
+        #back_button {
+          background-color: transparent;
+          margin: 0;
+          margin-left: 10px;
+          padding: 0;
+          border: none;
+          cursor: pointer;
+        }
+
+        .items {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid grey;
+            border-radius: 10px;
+            box-shadow: 3px 2px 2px black;
+            padding: 1vw;
+            cursor: pointer;
+        }
+        
+        .items p {
+          font-size: 3.6vw;
+        }
+        
+        .items b {
+          font-size: 2.7vw;
+        }
+
+        .items img {
+            width: 20vw;
+            height: 20vw;
+        }
+        
+        .product_image {
+           margin: auto;
+         }
+
+        .star_review {
+            width: 10vw !important;
+            height: 2vw !important;
+        }
+        
+        #search_header {
+           display: flex;
+           flex-direction: row;
+           align-items: center;
+           background-color: #2F3A73;
+           width: 100%;
+           margin-bottom: 30px;
+        }
+        
+        #search_header button, #search_header input { 
+          margin: 0;
+        }
+        
+        #search_header input { 
+          padding: 6px 0;
+          font-size: 12px;
+        }
+        
+        #search_header button {
+          margin-right: 20px;
+          margin-left: -4.5px;
+          padding: 6.6px;
+          font-size: 20px;
+        }
+        
+        form {
+          margin: 0;
+          margin-left: auto;
+          display: flex;
+          align-items: center;
+        }
+        
+        #cart {
+          font-size: 30px;
+          margin: 0;
+          margin-right: 20px;
+          margin-left: 15px;
+        }
+        
+        #search_btn {
+          font-size: 19px !important;
+          border: none;
+        }
+
+       .fa {
+        color: white;
+       }
+
+       #search_header h2 {
+        color: white;
+       }
+
+       #no_result {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 18px;
+       }
+        
+        @media (max-width: 450px) {
+          #items_container {grid-template-columns: repeat(2, 1fr);}
+          
+          #search_header h2 {display: none;}
+         
+          #search_header {padding: 3vw 0;}
+          
+          .product_image {width: 30vw !important; height: 35vw !important;}
+        }

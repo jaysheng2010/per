@@ -1,0 +1,101 @@
+ #account_details {
+        width: 98%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid black;
+        border-radius: 7px;
+        gap: 10px;
+        background-color: #FAFAFA;
+        padding: 10px 0px;
+    }
+
+    #account_details div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #account_details>div>img {
+        width: 80px;
+        height:80px;
+    }
+
+    #icons_container_account {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+        gap: 20vw;
+        margin-top: 100px;
+    }
+
+    #icons_container_account > div > img {
+        width: 80px;
+        height: 80px;
+    }
+    
+     #icons_container_account > div > p {
+        font-size: 18px;
+    }
+    
+    #icons_container_account > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    p {
+        margin: 0;
+    }
+    
+    #account_details_container {
+      width: 100%;
+      min-height: 100vh;      /* or any height you want */
+    display: flex;
+     flex-direction: column;
+    }
+    
+    #account_details_name {
+       font-weight: bold;
+       font-size: 30px;
+    }
+    
+    .account_details_info {
+       margin-bottom: 10px;
+       font-size: 18px;
+    }
+    
+    #account_details_info_container {
+       gap: 7px;
+    }
+    
+    .account_details_btn {
+      width: 90%;
+      padding: 10px 0;
+      font-size: 17px;
+    }
+    
+    #account_details_btn_div {
+       width: 100%;
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       gap: 20px;
+       margin-top: auto;
+    }
+    
+   #account_details_btn_reset {
+     background-color: blue;
+     color: white;
+   }
+   
+   #account_back_button {
+     font-size: 30px;
+     margin: 10px 0;
+   }
+   
+   #account_details_btn_del {
+     background-color: red;
+     color: white;
+   }
